@@ -143,7 +143,7 @@ private:
     static constexpr uint8_t  MAX_SUBSCRIBERS = Config::EventBus::MAX_LISTENERS_PER_EVENT
                                                 * Config::EventBus::MAX_EVENT_TYPES / 4;
     static constexpr uint32_t TASK_STACK_WORDS =
-        Config::Tasks::STACK_EVENT_BUS;
+        Config::Tasks::EVENT_BUS_STACK_WORDS;
 
     // --------------------------------------------------------
     // Member data
