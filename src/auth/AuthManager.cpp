@@ -8,6 +8,7 @@
 #include "../security/RateLimiter.h"
 #include "../services/Logger.h"
 #include "../services/EventBus.h"
+#include "../interfaces/IService.h"
 
 #include <Arduino.h>
 #include <cstring>
@@ -29,7 +30,7 @@ AuthManager& AuthManager::getInstance() noexcept {
 // Constructor
 // ============================================================
 AuthManager::AuthManager()
-    : m_state(ServiceState::UNINITIALIZED)
+    : m_state(Interfaces::ServiceState::UNINITIALIZED)
 {
 }
 
@@ -37,22 +38,22 @@ AuthManager::AuthManager()
 // IService::initialize
 // ============================================================
 Result AuthManager::initialize() {
-    if (m_state != ServiceState::UNINITIALIZED) {
+    if (m_state != Interfaces::ServiceState::UNINITIALIZED) {
         return Result::ERR_ALREADY_INITIALIZED;
     }
 
-    m_state = ServiceState::INITIALIZING;
+    m_state = Interfaces::ServiceState::INITIALIZING;
 
     // Initialize RateLimiter
     Result r = Security::RateLimiter::getInstance().initialize();
     if (GW_ERR(r)) {
         GW_LOG_E(TAG, "RateLimiter init failed: %s",
                  ResultHelper::toString(r));
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return r;
     }
 
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
     GW_LOG_I(TAG, "Initialized.");
     return Result::OK;
 }
@@ -61,28 +62,28 @@ Result AuthManager::initialize() {
 // IService::start / stop
 // ============================================================
 Result AuthManager::start() {
-    if (m_state != ServiceState::STOPPED) {
+    if (m_state != Interfaces::ServiceState::STOPPED) {
         return Result::ERR_INVALID_STATE;
     }
-    m_state = ServiceState::RUNNING;
+    m_state = Interfaces::ServiceState::RUNNING;
     GW_LOG_I(TAG, "Started.");
     return Result::OK;
 }
 
 Result AuthManager::stop() {
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
     return Result::OK;
 }
 
 // ============================================================
 // IService::getState / isHealthy
 // ============================================================
-ServiceState AuthManager::getState() const {
+Interfaces::ServiceState AuthManager::getState() const {
     return m_state;
 }
 
 bool AuthManager::isHealthy() const {
-    return m_state == ServiceState::RUNNING &&
+    return m_state == Interfaces::ServiceState::RUNNING &&
            Managers::UserManager::getInstance().isInitialized() &&
            SessionManager::getInstance().isHealthy();
 }

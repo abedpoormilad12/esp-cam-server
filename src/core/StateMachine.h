@@ -76,7 +76,7 @@ public:
     [[nodiscard]] Result       initialize()        override;
     [[nodiscard]] Result       start()             override;
     [[nodiscard]] Result       stop()              override;
-    [[nodiscard]] ServiceState getState()  const   override;
+    [[nodiscard]] Interfaces::ServiceState getState()  const   override;
     [[nodiscard]] const char*  getName()   const   override { return "StateMachine"; }
     [[nodiscard]] bool         isHealthy() const   override;
 
@@ -178,9 +178,7 @@ private:
 
     TaskHandle_t                m_taskHandle;
     StaticTask_t                m_taskTCB;
-    StackType_t                 m_taskStack[
-        Config::Tasks::STACK_STATE_MACHINE
-    ];
+    StackType_t                 m_taskStack[ Config::Tasks::STACK_STATE_MACHINE ];
 
     // Observers
     StateChangeCallback         m_observers[MAX_OBSERVERS];

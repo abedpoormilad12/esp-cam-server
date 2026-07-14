@@ -49,7 +49,7 @@ uint32_t SessionManager::nowSeconds() noexcept {
 // IService::initialize
 // ============================================================
 Result SessionManager::initialize() {
-    if (m_state != ServiceState::UNINITIALIZED) {
+    if (m_state != Interfaces::ServiceState::UNINITIALIZED) {
         return Result::ERR_ALREADY_INITIALIZED;
     }
 
@@ -65,7 +65,7 @@ Result SessionManager::initialize() {
     }
 
     m_stats = Stats{};
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
 
     GW_LOG_I(TAG, "Initialized. Pool: %d sessions.", MAX_SESSIONS);
     return Result::OK;
@@ -75,18 +75,18 @@ Result SessionManager::initialize() {
 // IService::start / stop
 // ============================================================
 Result SessionManager::start() {
-    if (m_state != ServiceState::STOPPED) {
+    if (m_state != Interfaces::ServiceState::STOPPED) {
         return Result::ERR_INVALID_STATE;
     }
-    m_state = ServiceState::RUNNING;
+    m_state = Interfaces::ServiceState::RUNNING;
     GW_LOG_I(TAG, "Started.");
     return Result::OK;
 }
 
 Result SessionManager::stop() {
-    if (m_state == ServiceState::RUNNING) {
+    if (m_state == Interfaces::ServiceState::RUNNING) {
         destroyAllSessions();
-        m_state = ServiceState::STOPPED;
+        m_state = Interfaces::ServiceState::STOPPED;
     }
     return Result::OK;
 }
@@ -110,13 +110,13 @@ void SessionManager::tick() {
 // IService::isHealthy
 // ============================================================
 bool SessionManager::isHealthy() const {
-    return m_state == ServiceState::RUNNING;
+    return m_state == Interfaces::ServiceState::RUNNING;
 }
 
 // ============================================================
 // IService::getState
 // ============================================================
-ServiceState SessionManager::getState() const {
+Interfaces::ServiceState SessionManager::getState() const {
     return m_state;
 }
 

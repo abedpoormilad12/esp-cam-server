@@ -1,32 +1,79 @@
 // ============================================================
-// main.cpp
-// Entry point for the Gateway firmware.
-//
-// This file intentionally contains minimal logic.
-// All initialization is delegated to Application class.
-// setup() and loop() are present ONLY because the Arduino
-// framework requires them. They are NOT the application.
+// IAuthProvider.h
+// Authentication provider interface for the gateway.
 // ============================================================
 
-#include <Arduino.h>
-#include "core/Application.h"
+#pragma once
 
-// ============================================================
-// Arduino entry point - Initialization only
-// ============================================================
-void setup() {
-    // Application is a singleton that owns the entire firmware.
-    // It manages boot sequence, task creation and service lifecycle.
-    Gateway::Application::getInstance().begin();
-}
+#ifndef IAUTH_PROVIDER_H
+#define IAUTH_PROVIDER_H
 
-// ============================================================
-// Arduino loop - intentionally minimal
-// The firmware runs via FreeRTOS tasks created in Application.
-// This task runs at priority 1 on Core 1 and is essentially idle.
-// ============================================================
-void loop() {
-    // Yield to FreeRTOS scheduler.
-    // All real work happens in Application-managed tasks.
-    vTaskDelay(pdMS_TO_TICKS(1000));
-}
+#include "../core/ErrorCodes.h"
+#include "../models/UserRole.h"
+#include <cstddef>
+#include <cstdint>
+
+namespace Gateway {
+namespace Interfaces {
+
+using UserRole = Gateway::Models::UserRole;
+
+struct AuthenticatedUser {
+    char userId[32];
+    char username[32];
+    UserRole role;
+    uint32_t authenticatedAt;
+    bool valid;
+
+    AuthenticatedUser()
+        : role(UserRole::NONE)
+        , authenticatedAt(0)
+        , valid(false)
+    {
+        userId[0] = '\0';
+        username[0] = '\0';
+    }
+};
+
+class IAuthProvider {
+public:
+    virtual ~IAuthProvider() = default;
+
+    [[nodiscard]] virtual Result authenticate(
+        const char* username,
+        const char* password,
+        AuthenticatedUser& outUser
+    ) = 0;
+
+    [[nodiscard]] virtual Result validateSession(
+        const char* sessionId,
+        AuthenticatedUser& outUser
+    ) = 0;
+
+    [[nodiscard]] virtual Result createSession(
+        const AuthenticatedUser& user,
+        char* outSessionId,
+        size_t sessionIdBufferSize
+    ) = 0;
+
+    [[nodiscard]] virtual Result destroySession(
+        const char* sessionId
+    ) = 0;
+
+    [[nodiscard]] virtual bool hasPermission(
+        const AuthenticatedUser& user,
+        const char* resource,
+        const char* action
+    ) const = 0;
+
+protected:
+    IAuthProvider() = default;
+
+    IAuthProvider(const IAuthProvider&) = delete;
+    IAuthProvider& operator=(const IAuthProvider&) = delete;
+};
+
+} // namespace Interfaces
+} // namespace Gateway
+
+#endif // IAUTH_PROVIDER_H

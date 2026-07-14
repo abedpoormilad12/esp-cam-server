@@ -32,6 +32,17 @@
 #include <cstdint>
 #include <cstddef>
 
+// Forward declarations for SystemConfig::Auth constants (defined in ../core/SystemConfig.h)
+namespace Gateway {
+namespace SystemConfig {
+namespace Auth {
+    extern const uint8_t MAX_SESSIONS;
+    extern const uint8_t RATE_LIMIT_REQUESTS;
+    extern const uint32_t RATE_LIMIT_WINDOW_S;
+} // namespace Auth
+} // namespace SystemConfig
+} // namespace Gateway
+
 namespace Gateway {
 namespace Config {
 
@@ -98,11 +109,11 @@ struct SecurityCfg {
 
     SecurityCfg()
         : sessionTimeoutSeconds(Default::SESSION_TIMEOUT_S)
-        , maxSessions(SystemConfig::Auth::MAX_SESSIONS)
+        , maxSessions(::Gateway::SystemConfig::Auth::MAX_SESSIONS)
         , csrfEnabled(Default::CSRF_ENABLED)
         , rateLimitEnabled(Default::RATE_LIMIT_ENABLED)
-        , rateLimitRequests(SystemConfig::Auth::RATE_LIMIT_REQUESTS)
-        , rateLimitWindowSeconds(SystemConfig::Auth::RATE_LIMIT_WINDOW_S)
+        , rateLimitRequests(::Gateway::SystemConfig::Auth::RATE_LIMIT_REQUESTS)
+        , rateLimitWindowSeconds(::Gateway::SystemConfig::Auth::RATE_LIMIT_WINDOW_S)
     {}
 };
 
@@ -234,9 +245,9 @@ private:
 };
 
 // ============================================================
-// Convenience alias
+// Convenience namespace alias
 // ============================================================
-using SystemConfig = ::Gateway::Config::SystemConfig;
+namespace SystemConfig = ::Gateway::SystemConfig;
 
 } // namespace Config
 } // namespace Gateway

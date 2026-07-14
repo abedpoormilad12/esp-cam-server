@@ -44,7 +44,7 @@ public:
     [[nodiscard]] Result       initialize()       override;
     [[nodiscard]] Result       start()            override;
     [[nodiscard]] Result       stop()             override;
-    [[nodiscard]] ServiceState getState()  const  override;
+    [[nodiscard]] Interfaces::ServiceState getState()  const  override;
     [[nodiscard]] const char*  getName()   const  override { return "StorageManager"; }
     [[nodiscard]] bool         isHealthy() const  override;
 

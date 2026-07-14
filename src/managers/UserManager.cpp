@@ -567,7 +567,7 @@ Result UserManager::deleteUser(const char* userId,
 
     // Self-delete guard
     if (strncmp(userId, requestingUserId,
-                 sizeof(Models::User::userId) - 1) == 0) {
+                 sizeof(m_users[0].userId) - 1) == 0) {
         return Result::ERR_USER_CANNOT_DELETE_SELF;
     }
 
@@ -595,7 +595,7 @@ Result UserManager::deleteUser(const char* userId,
              user->username, userId);
 
     // Sanitize deleted user
-    m_users[idx].invalidate();
+    m_users[idx] = Models::User{};
 
     // Compact
     for (uint8_t i = idx; i < m_userCount - 1; ++i) {

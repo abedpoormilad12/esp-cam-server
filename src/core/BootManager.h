@@ -112,7 +112,8 @@ private:
 
     TaskHandle_t    m_taskHandle;
     StaticTask_t    m_taskTCB;
-    uint8_t         m_taskStack[Gateway::Config::Tasks::STACK_BOOT_MANAGER];
+    static constexpr uint32_t TaskStackSize = 4096;
+    uint8_t         m_taskStack[TaskStackSize];
 };
 
 } // namespace Core

@@ -42,7 +42,7 @@ NetworkManager& NetworkManager::getInstance() noexcept {
 // Constructor
 // ============================================================
 NetworkManager::NetworkManager()
-    : m_state(ServiceState::UNINITIALIZED)
+    : m_state(Interfaces::ServiceState::UNINITIALIZED)
     , m_setupMode(false)
     , m_taskHandle(nullptr)
     , m_taskTCB{}
@@ -56,15 +56,15 @@ NetworkManager::NetworkManager()
 // IService::initialize
 // ============================================================
 Result NetworkManager::initialize() {
-    if (m_state != ServiceState::UNINITIALIZED) {
+    if (m_state != Interfaces::ServiceState::UNINITIALIZED) {
         return Result::ERR_ALREADY_INITIALIZED;
     }
 
-    m_state = ServiceState::INITIALIZING;
+    m_state = Interfaces::ServiceState::INITIALIZING;
 
     m_mutex = xSemaphoreCreateMutex();
     if (!m_mutex) {
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return Result::ERR_OUT_OF_MEMORY;
     }
 
@@ -73,7 +73,7 @@ Result NetworkManager::initialize() {
     if (GW_ERR(r)) {
         GW_LOG_E(TAG, "WiFiManager init failed: %s",
                  ResultHelper::toString(r));
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return r;
     }
 
@@ -90,7 +90,7 @@ Result NetworkManager::initialize() {
     // Subscribe to EventBus
     Services::EventBus::getInstance().subscribe(this);
 
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
     GW_LOG_I(TAG, "Initialized.");
     return Result::OK;
 }
@@ -99,7 +99,7 @@ Result NetworkManager::initialize() {
 // IService::start
 // ============================================================
 Result NetworkManager::start() {
-    if (m_state != ServiceState::STOPPED) {
+    if (m_state != Interfaces::ServiceState::STOPPED) {
         return Result::ERR_INVALID_STATE;
     }
 
@@ -123,11 +123,11 @@ Result NetworkManager::start() {
     );
 
     if (!m_taskHandle) {
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return Result::ERR_OPERATION_FAILED;
     }
 
-    m_state = ServiceState::RUNNING;
+    m_state = Interfaces::ServiceState::RUNNING;
     GW_LOG_I(TAG, "Started.");
     return Result::OK;
 }
@@ -136,12 +136,12 @@ Result NetworkManager::start() {
 // IService::stop
 // ============================================================
 Result NetworkManager::stop() {
-    if (m_state != ServiceState::RUNNING &&
-        m_state != ServiceState::PAUSED) {
+    if (m_state != Interfaces::ServiceState::RUNNING &&
+        m_state != Interfaces::ServiceState::PAUSED) {
         return Result::ERR_INVALID_STATE;
     }
 
-    m_state = ServiceState::STOPPING;
+    m_state = Interfaces::ServiceState::STOPPING;
 
     Services::EventBus::getInstance().unsubscribe(this);
 
@@ -153,7 +153,7 @@ Result NetworkManager::stop() {
         m_taskHandle = nullptr;
     }
 
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
     GW_LOG_I(TAG, "Stopped.");
     return Result::OK;
 }
@@ -162,7 +162,7 @@ Result NetworkManager::stop() {
 // IService::isHealthy
 // ============================================================
 bool NetworkManager::isHealthy() const {
-    if (m_state != ServiceState::RUNNING) return false;
+    if (m_state != Interfaces::ServiceState::RUNNING) return false;
 
     // Healthy if either: STA connected OR AP active (setup mode)
     return WiFiManager::getInstance().isSTAConnected() ||
@@ -172,7 +172,7 @@ bool NetworkManager::isHealthy() const {
 // ============================================================
 // IService::getState
 // ============================================================
-ServiceState NetworkManager::getState() const {
+Interfaces::ServiceState NetworkManager::getState() const {
     return m_state;
 }
 

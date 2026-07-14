@@ -11,7 +11,13 @@
 #include "../services/ServiceLocator.h"
 
 #include <Arduino.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <esp_task_wdt.h>
+#ifdef __cplusplus
+}
+#endif
 
 namespace Gateway {
 
@@ -51,12 +57,7 @@ Application::Application()
 // ============================================================
 void Application::begin() {
     // ---- Step 1: Initialize Watchdog ----
-    esp_task_wdt_config_t wdt_cfg = {
-        .timeout_ms     = Config::Hardware::WATCHDOG_TIMEOUT_S * 1000,
-        .idle_core_mask = 0,
-        .trigger_panic  = true
-    };
-    esp_task_wdt_reconfigure(&wdt_cfg);
+    esp_task_wdt_init(Config::Hardware::WATCHDOG_TIMEOUT_S, true);
     esp_task_wdt_add(nullptr);
 
     // ---- Step 2: Initialize Foundation (Logger + EventBus) ----

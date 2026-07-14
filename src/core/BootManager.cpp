@@ -30,7 +30,7 @@ BootManager& BootManager::getInstance() noexcept {
 // Constructor
 // ============================================================
 BootManager::BootManager()
-    : m_serviceState(ServiceState::UNINITIALIZED)
+    : m_serviceState(Interfaces::ServiceState::UNINITIALIZED)
     , m_bootComplete(false)
     , m_progress(0)
     , m_currentPhase("idle")
@@ -46,11 +46,11 @@ BootManager::BootManager()
 // IService::initialize
 // ============================================================
 Result BootManager::initialize() {
-    if (m_serviceState != ServiceState::UNINITIALIZED) {
+    if (m_serviceState != Interfaces::ServiceState::UNINITIALIZED) {
         return Result::ERR_ALREADY_INITIALIZED;
     }
 
-    m_serviceState = ServiceState::STOPPED;
+    m_serviceState = Interfaces::ServiceState::STOPPED;
     return Result::OK;
 }
 
@@ -58,7 +58,7 @@ Result BootManager::initialize() {
 // IService::start
 // ============================================================
 Result BootManager::start() {
-    if (m_serviceState != ServiceState::STOPPED) {
+    if (m_serviceState != Interfaces::ServiceState::STOPPED) {
         return Result::ERR_INVALID_STATE;
     }
 
@@ -76,11 +76,11 @@ Result BootManager::start() {
     );
 
     if (!m_taskHandle) {
-        m_serviceState = ServiceState::FAULTED;
+        m_serviceState = Interfaces::ServiceState::FAULTED;
         return Result::ERR_OPERATION_FAILED;
     }
 
-    m_serviceState = ServiceState::RUNNING;
+    m_serviceState = Interfaces::ServiceState::RUNNING;
     return Result::OK;
 }
 
@@ -93,7 +93,7 @@ Result BootManager::stop() {
         m_taskHandle = nullptr;
     }
 
-    m_serviceState = ServiceState::STOPPED;
+    m_serviceState = Interfaces::ServiceState::STOPPED;
     return Result::OK;
 }
 
@@ -101,8 +101,8 @@ Result BootManager::stop() {
 // IService::isHealthy
 // ============================================================
 bool BootManager::isHealthy() const {
-    return m_bootComplete ||
-           m_serviceState == ServiceState::RUNNING;
+        return m_bootComplete ||
+            m_serviceState == Interfaces::ServiceState::RUNNING;
 }
 
 // ============================================================
@@ -163,7 +163,7 @@ void BootManager::onBootFailure(Result reason, SystemEvent failEvent) {
     StateMachine::getInstance().processEventSync(failEvent);
 
     // Self-destruct — boot task is done
-    m_serviceState = ServiceState::FAULTED;
+    m_serviceState = Interfaces::ServiceState::FAULTED;
 }
 
 // ============================================================
@@ -197,7 +197,7 @@ Result BootManager::phaseHardwareInit() {
              __DATE__);
     GW_LOG_I(TAG, "================================================");
     GW_LOG_I(TAG, "  Chip: ESP32 Rev%d | Cores: %d | %dMHz",
-             static_cast<int>(esp_get_chip_info(nullptr), 0),
+             static_cast<int>(ESP.getChipModel()),
              static_cast<int>(ESP.getChipCores()),
              static_cast<int>(ESP.getCpuFreqMHz()));
     GW_LOG_I(TAG, "  Flash: %lu KB | RAM: %lu KB",

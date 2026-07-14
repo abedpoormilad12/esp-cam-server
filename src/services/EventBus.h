@@ -148,7 +148,7 @@ private:
     // --------------------------------------------------------
     // Member data
     // --------------------------------------------------------
-    ServiceState            m_state;
+    Interfaces::ServiceState            m_state;
 
     // Subscriber table — statically allocated
     IEventListener*         m_subscribers[32];

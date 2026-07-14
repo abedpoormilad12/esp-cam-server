@@ -105,7 +105,6 @@ StateMachine::StateMachine()
     , m_eventQueueStorage{}
     , m_taskHandle(nullptr)
     , m_taskTCB{}
-    , m_taskStack{}
     , m_observers{}
     , m_observerCount(0)
     , m_observerMutex(nullptr)
@@ -119,7 +118,7 @@ StateMachine::StateMachine()
 }
 
 StateMachine::~StateMachine() {
-    stop();
+    (void)stop();
 }
 
 // ============================================================
@@ -184,7 +183,7 @@ Result StateMachine::start() {
         Config::Tasks::STACK_STATE_MACHINE,
         this,
         Config::Tasks::PRIORITY_STATE_MACHINE,
-        m_taskStack,
+        // m_taskStack,
         &m_taskTCB,
         Config::Tasks::CORE_APPLICATION
     );

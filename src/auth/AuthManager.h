@@ -42,12 +42,12 @@ public:
     // --------------------------------------------------------
     // IService
     // --------------------------------------------------------
-    [[nodiscard]] Result       initialize()       override;
-    [[nodiscard]] Result       start()            override;
-    [[nodiscard]] Result       stop()             override;
-    [[nodiscard]] ServiceState getState()  const  override;
-    [[nodiscard]] const char*  getName()   const  override { return "AuthManager"; }
-    [[nodiscard]] bool         isHealthy() const  override;
+    [[nodiscard]] Result                   initialize()       override;
+    [[nodiscard]] Result                   start()            override;
+    [[nodiscard]] Result                   stop()             override;
+    [[nodiscard]] Interfaces::ServiceState getState()  const  override;
+    [[nodiscard]] const char*              getName()   const  override { return "AuthManager"; }
+    [[nodiscard]] bool                     isHealthy() const  override;
 
     // --------------------------------------------------------
     // IHealthCheck
@@ -132,7 +132,7 @@ private:
     AuthManager(const AuthManager&)            = delete;
     AuthManager& operator=(const AuthManager&) = delete;
 
-    ServiceState m_state;
+    Interfaces::ServiceState m_state;
 };
 
 } // namespace Auth

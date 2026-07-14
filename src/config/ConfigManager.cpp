@@ -58,10 +58,11 @@ Result ConfigManager::initialize() {
 
     // Load from JSON file (full config)
     bool fileExists = false;
-    auto& storageMgr = Storage::StorageManager::getInstance();
-    storageMgr.fileExists(
+    auto& storageMgr = ::Gateway::Storage::StorageManager::getInstance();
+    Result r_exists = storageMgr.fileExists(
         Config::Storage::FS_CONFIG_FILE, fileExists
     );
+    if (GW_ERR(r_exists)) return r_exists;
 
     if (fileExists) {
         r = loadFromFile();
@@ -106,7 +107,7 @@ Result ConfigManager::applyDefaults() {
 // loadFromFile — parse system.json
 // ============================================================
 Result ConfigManager::loadFromFile() {
-    auto& storageMgr = Storage::StorageManager::getInstance();
+    auto& storageMgr = ::Gateway::Storage::StorageManager::getInstance();
 
     char   jsonBuffer[JSON_DOC_SIZE];
     size_t jsonSize = 0;
@@ -127,7 +128,7 @@ Result ConfigManager::loadFromFile() {
 
     if (err) {
         GW_LOG_E(TAG, "JSON parse error: %s", err.c_str());
-        return Result::ERR_CONFIG_CORRUPTED;
+        return Result::ERR_CONFIG_INVALID;
     }
 
     // Take write lock
@@ -330,7 +331,7 @@ Result ConfigManager::saveToFile() {
         return Result::ERR_CONFIG_SAVE_FAILED;
     }
 
-    return Storage::StorageManager::getInstance().writeJsonFile(
+    return ::Gateway::Storage::StorageManager::getInstance().writeJsonFile(
         Config::Storage::FS_CONFIG_FILE, jsonBuffer
     );
 }
@@ -339,7 +340,7 @@ Result ConfigManager::saveToFile() {
 // loadFromNVS — load boot-critical values
 // ============================================================
 Result ConfigManager::loadFromNVS() {
-    auto& nvs = Storage::StorageManager::getInstance().getConfigNVS();
+    auto& nvs = ::Gateway::Storage::StorageManager::getInstance().getConfigNVS();
 
     char  buf[65];
     Result r;
@@ -366,7 +367,7 @@ Result ConfigManager::loadFromNVS() {
 // saveToNVS — save boot-critical values fast
 // ============================================================
 Result ConfigManager::saveToNVS() {
-    auto& nvs = Storage::StorageManager::getInstance().getConfigNVS();
+    auto& nvs = ::Gateway::Storage::StorageManager::getInstance().getConfigNVS();
 
     GW_RETURN_IF_ERR(nvs.writeString(NVSKey::WIFI_SSID,
                                       m_network.ssid));
@@ -419,13 +420,32 @@ Result ConfigManager::reload() {
 Result ConfigManager::factoryReset() {
     GW_LOG_W(TAG, "Factory reset initiated!");
 
-    auto& storageMgr = Storage::StorageManager::getInstance();
+    auto& storageMgr = ::Gateway::Storage::StorageManager::getInstance();
 
-    storageMgr.getConfigNVS().clear();
-    storageMgr.getAuthNVS().clear();
-    storageMgr.getSystemNVS().clear();
-    storageMgr.deleteFile(Config::Storage::FS_CONFIG_FILE);
-    storageMgr.deleteFile(Config::Storage::FS_USERS_FILE);
+    Result r = storageMgr.getConfigNVS().clear();
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "Failed to clear config NVS: %s", ResultHelper::toString(r));
+    }
+
+    r = storageMgr.getAuthNVS().clear();
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "Failed to clear auth NVS: %s", ResultHelper::toString(r));
+    }
+
+    r = storageMgr.getSystemNVS().clear();
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "Failed to clear system NVS: %s", ResultHelper::toString(r));
+    }
+
+    r = storageMgr.deleteFile(Config::Storage::FS_CONFIG_FILE);
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "Failed to delete config file: %s", ResultHelper::toString(r));
+    }
+
+    r = storageMgr.deleteFile(Config::Storage::FS_USERS_FILE);
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "Failed to delete users file: %s", ResultHelper::toString(r));
+    }
 
     applyDefaults();
     saveToFile();
@@ -572,19 +592,19 @@ Result ConfigManager::setHostname(const char* hostname) {
 // Setup management
 // ============================================================
 bool ConfigManager::isSetupComplete() const {
-    auto& nvs = Storage::StorageManager::getInstance().getConfigNVS();
+    auto& nvs = ::Gateway::Storage::StorageManager::getInstance().getConfigNVS();
     uint32_t val = 0;
-    nvs.readUInt32(NVSKey::SETUP_COMPLETE, val);
+    (void)nvs.readUInt32(NVSKey::SETUP_COMPLETE, val);
     return val == 1;
 }
 
 Result ConfigManager::markSetupComplete() {
-    auto& nvs = Storage::StorageManager::getInstance().getConfigNVS();
+    auto& nvs = ::Gateway::Storage::StorageManager::getInstance().getConfigNVS();
     return nvs.writeUInt32(NVSKey::SETUP_COMPLETE, 1);
 }
 
 Result ConfigManager::markFirstBoot() {
-    auto& nvs = Storage::StorageManager::getInstance().getConfigNVS();
+    auto& nvs = ::Gateway::Storage::StorageManager::getInstance().getConfigNVS();
     return nvs.writeUInt32(NVSKey::FIRST_BOOT, 0);
 }
 
@@ -592,14 +612,14 @@ Result ConfigManager::markFirstBoot() {
 // Boot counter
 // ============================================================
 uint32_t ConfigManager::getBootCount() const {
-    auto& nvs = Storage::StorageManager::getInstance().getSystemNVS();
+    auto& nvs = ::Gateway::Storage::StorageManager::getInstance().getSystemNVS();
     uint32_t count = 0;
-    nvs.readUInt32(NVSKey::BOOT_COUNT, count);
+    (void)nvs.readUInt32(NVSKey::BOOT_COUNT, count);
     return count;
 }
 
 Result ConfigManager::incrementBootCount() {
-    auto& nvs   = Storage::StorageManager::getInstance().getSystemNVS();
+    auto& nvs   = ::Gateway::Storage::StorageManager::getInstance().getSystemNVS();
     uint32_t count = getBootCount();
     return nvs.writeUInt32(NVSKey::BOOT_COUNT, count + 1);
 }

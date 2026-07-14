@@ -51,44 +51,51 @@ struct Hardware {
 // FreeRTOS Task Configuration
 // ============================================================
 struct Tasks {
-    // Stack sizes (words, 1 word = 4 bytes on ESP32)
-    // Task stack sizes (words)
-static constexpr uint32_t BOOT_MANAGER_STACK_WORDS =
-    STACK_BOOT_MANAGER / sizeof(StackType_t);
+    // Stack sizes (bytes from build flags; convert to words for FreeRTOS)
+    static constexpr uint32_t BOOT_MANAGER_STACK_WORDS =
+        STACK_SIZE_BOOT_MANAGER / sizeof(StackType_t);
 
-static constexpr uint32_t HEALTH_MONITOR_STACK_WORDS =
-    STACK_HEALTH_MONITOR / sizeof(StackType_t);
+    static constexpr uint32_t HEALTH_MONITOR_STACK_WORDS =
+        STACK_SIZE_HEALTH_MONITOR / sizeof(StackType_t);
 
-static constexpr uint32_t EVENT_BUS_STACK_WORDS =
-    STACK_EVENT_BUS / sizeof(StackType_t);
+    static constexpr uint32_t EVENT_BUS_STACK_WORDS =
+        STACK_SIZE_EVENT_BUS / sizeof(StackType_t);
 
-static constexpr uint32_t LOGGER_STACK_WORDS =
-    STACK_LOGGER / sizeof(StackType_t);
+    static constexpr uint32_t LOGGER_STACK_WORDS =
+        STACK_SIZE_LOGGER / sizeof(StackType_t);
 
-static constexpr uint32_t STATE_MACHINE_STACK_WORDS =
-    STACK_STATE_MACHINE / sizeof(StackType_t);
+    static constexpr uint32_t STATE_MACHINE_STACK_WORDS =
+        STACK_SIZE_STATE_MACHINE / sizeof(StackType_t);
 
-static constexpr uint32_t NETWORK_MANAGER_STACK_WORDS =
-    STACK_NETWORK_MANAGER / sizeof(StackType_t);
+    static constexpr uint32_t NETWORK_MANAGER_STACK_WORDS =
+        STACK_SIZE_NETWORK_MANAGER / sizeof(StackType_t);
 
-// Task priorities
-static constexpr UBaseType_t BOOT_MANAGER_PRIORITY =
-    PRIORITY_BOOT_MANAGER;
+    // Exposed task stack sizes used by components.
+    static constexpr uint32_t STACK_BOOT_MANAGER = BOOT_MANAGER_STACK_WORDS;
+    static constexpr uint32_t STACK_HEALTH_MONITOR = HEALTH_MONITOR_STACK_WORDS;
+    static constexpr uint32_t STACK_EVENT_BUS = EVENT_BUS_STACK_WORDS;
+    static constexpr uint32_t STACK_LOGGER = LOGGER_STACK_WORDS;
+    static constexpr uint32_t STACK_STATE_MACHINE = STATE_MACHINE_STACK_WORDS;
+    static constexpr uint32_t STACK_NETWORK_MANAGER = NETWORK_MANAGER_STACK_WORDS;
 
-    static constexpr UBaseType_t HEALTH_MONITOR_PRIORITY =
-        PRIORITY_HEALTH_MONITOR;
+    // Task priorities
+    static constexpr UBaseType_t PRIORITY_BOOT_MANAGER =
+        static_cast<UBaseType_t>(PRIORITY_VALUE_BOOT_MANAGER);
 
-    static constexpr UBaseType_t EVENT_BUS_PRIORITY =
-        PRIORITY_EVENT_BUS;
+    static constexpr UBaseType_t PRIORITY_HEALTH_MONITOR =
+        static_cast<UBaseType_t>(PRIORITY_VALUE_HEALTH_MONITOR);
 
-    static constexpr UBaseType_t LOGGER_PRIORITY =
-        PRIORITY_LOGGER;
+    static constexpr UBaseType_t PRIORITY_EVENT_BUS =
+        static_cast<UBaseType_t>(PRIORITY_VALUE_EVENT_BUS);
 
-    static constexpr UBaseType_t STATE_MACHINE_PRIORITY =
-        PRIORITY_STATE_MACHINE;
+    static constexpr UBaseType_t PRIORITY_LOGGER =
+        static_cast<UBaseType_t>(PRIORITY_VALUE_LOGGER);
 
-    static constexpr UBaseType_t NETWORK_MANAGER_PRIORITY =
-        PRIORITY_NETWORK_MANAGER;
+    static constexpr UBaseType_t PRIORITY_STATE_MACHINE =
+        static_cast<UBaseType_t>(PRIORITY_VALUE_STATE_MACHINE);
+
+    static constexpr UBaseType_t PRIORITY_NETWORK_MANAGER =
+        static_cast<UBaseType_t>(PRIORITY_VALUE_NETWORK_MANAGER);
 
     // Core affinity
     static constexpr BaseType_t CORE_PROTOCOL    = 0;  // WiFi, Async Web
