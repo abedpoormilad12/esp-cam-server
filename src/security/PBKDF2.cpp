@@ -7,6 +7,7 @@
 
 #include <mbedtls/pkcs5.h>
 #include <mbedtls/md.h>
+#include <mbedtls/md_internal.h>
 
 #include <cstring>
 #include <cstdio>
@@ -50,8 +51,20 @@ Result PBKDF2::deriveKey(
         return Result::ERR_CRYPTO_FAILED;
     }
 
-    int ret = mbedtls_pkcs5_pbkdf2_hmac_ext(
-        MBEDTLS_MD_SHA256,
+    // Some mbedTLS builds expect an mbedtls_md_context_t* instead of
+    // const mbedtls_md_info_t*. Create and setup a md context and use that.
+    mbedtls_md_context_t mdCtx;
+    mbedtls_md_init(&mdCtx);
+
+    int ret = mbedtls_md_setup(&mdCtx, mdInfo, 1);
+    if (ret != 0) {
+        mbedtls_md_free(&mdCtx);
+        return Result::ERR_CRYPTO_FAILED;
+    }
+
+    // Use mbedtls_pkcs5_pbkdf2_hmac which may accept the md context in this build
+    ret = mbedtls_pkcs5_pbkdf2_hmac(
+        &mdCtx,
         password,
         passwordLen,
         salt,
@@ -60,6 +73,8 @@ Result PBKDF2::deriveKey(
         static_cast<uint32_t>(keyLen),
         outKey
     );
+
+    mbedtls_md_free(&mdCtx);
 
     if (ret != 0) {
         return Result::ERR_HASH_FAILED;

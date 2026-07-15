@@ -150,9 +150,9 @@ void BootManager::onBootSuccess() {
     GW_LOG_I(TAG, "Boot completed in %lu ms",
              static_cast<unsigned long>(getBootDurationMs()));
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::BOOT_COMPLETE
-    );
+    ));
 }
 
 void BootManager::onBootFailure(Result reason, SystemEvent failEvent) {
@@ -160,7 +160,7 @@ void BootManager::onBootFailure(Result reason, SystemEvent failEvent) {
              m_currentPhase,
              ResultHelper::toString(reason));
 
-    StateMachine::getInstance().processEventSync(failEvent);
+    static_cast<void>(StateMachine::getInstance().processEventSync(failEvent));
 
     // Self-destruct — boot task is done
     m_serviceState = Interfaces::ServiceState::FAULTED;
@@ -196,8 +196,7 @@ Result BootManager::phaseHardwareInit() {
              Config::FirmwareInfo::BUILD_TYPE,
              __DATE__);
     GW_LOG_I(TAG, "================================================");
-    GW_LOG_I(TAG, "  Chip: ESP32 Rev%d | Cores: %d | %dMHz",
-             static_cast<int>(ESP.getChipModel()),
+    GW_LOG_I(TAG, "  Chip: ESP32 | Cores: %d | %dMHz",
              static_cast<int>(ESP.getChipCores()),
              static_cast<int>(ESP.getCpuFreqMHz()));
     GW_LOG_I(TAG, "  Flash: %lu KB | RAM: %lu KB",
@@ -209,9 +208,9 @@ Result BootManager::phaseHardwareInit() {
              static_cast<int>(esp_reset_reason()));
     GW_LOG_I(TAG, "================================================");
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::HARDWARE_INIT_OK
-    );
+    ));
 
     return Result::OK;
 }
@@ -247,9 +246,9 @@ Result BootManager::phaseStorageInit() {
         }
     }
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::STORAGE_MOUNTED
-    );
+    ));
 
     return Result::OK;
 }
@@ -268,9 +267,9 @@ Result BootManager::phaseConfigLoad() {
 
     if (!configExists) {
         GW_LOG_W(TAG, "No config file found — entering setup mode");
-        StateMachine::getInstance().processEventSync(
+        static_cast<void>(StateMachine::getInstance().processEventSync(
             SystemEvent::CONFIG_NOT_FOUND
-        );
+        ));
         return Result::ERR_CONFIG_LOAD_FAILED;
     }
 
@@ -284,16 +283,16 @@ Result BootManager::phaseConfigLoad() {
         if (GW_ERR(r)) {
             GW_LOG_E(TAG, "ConfigManager init failed: %s",
                      ResultHelper::toString(r));
-            StateMachine::getInstance().processEventSync(
+            static_cast<void>(StateMachine::getInstance().processEventSync(
                 SystemEvent::CONFIG_CORRUPTED
-            );
+            ));
             return r;
         }
     }
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::CONFIG_LOADED
-    );
+    ));
 
     return Result::OK;
 }
@@ -311,9 +310,9 @@ Result BootManager::phaseSecurityInit() {
 
     GW_LOG_I(TAG, "Security subsystem ready.");
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::SECURITY_READY
-    );
+    ));
 
     return Result::OK;
 }
@@ -341,9 +340,9 @@ Result BootManager::phaseNetworkInit() {
         return r;
     }
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::NETWORK_DRIVER_READY
-    );
+    ));
 
     return Result::OK;
 }
@@ -399,9 +398,9 @@ Result BootManager::phaseServicesInit() {
 
     feedWatchdog();
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::SERVICES_READY
-    );
+    ));
 
     return Result::OK;
 }
@@ -419,9 +418,9 @@ Result BootManager::phaseNetworkConnect() {
 
     if (!networkMgr) {
         GW_LOG_W(TAG, "No NetworkManager — skipping WiFi connect");
-        StateMachine::getInstance().processEventSync(
+        static_cast<void>(StateMachine::getInstance().processEventSync(
             SystemEvent::WIFI_FAILED
-        );
+        ));
         return Result::ERR_NETWORK_INIT_FAILED;
     }
 
@@ -429,16 +428,16 @@ Result BootManager::phaseNetworkConnect() {
     if (GW_ERR(r)) {
         GW_LOG_W(TAG, "WiFi connect failed: %s — continuing degraded",
                  ResultHelper::toString(r));
-        StateMachine::getInstance().processEventSync(
+        static_cast<void>(StateMachine::getInstance().processEventSync(
             SystemEvent::WIFI_FAILED
-        );
+        ));
         // Not fatal — gateway can run in degraded mode
         return Result::OK;
     }
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::WIFI_CONNECTED
-    );
+    ));
 
     return Result::OK;
 }
@@ -475,9 +474,9 @@ Result BootManager::phaseWebServerInit() {
 
     feedWatchdog();
 
-    StateMachine::getInstance().processEventSync(
+    static_cast<void>(StateMachine::getInstance().processEventSync(
         SystemEvent::WEBSERVER_STARTED
-    );
+    ));
 
     return Result::OK;
 }

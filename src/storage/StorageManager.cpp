@@ -29,7 +29,7 @@ StorageManager::StorageManager()
     , m_nvsAuth  (Config::Storage::NVS_NAMESPACE_AUTH,   false)
     , m_nvsSystem(Config::Storage::NVS_NAMESPACE_SYSTEM,  false)
     , m_littleFS (Config::Storage::FS_ROOT)
-    , m_state(ServiceState::UNINITIALIZED)
+    , m_state(Interfaces::ServiceState::UNINITIALIZED)
 {
 }
 
@@ -37,18 +37,18 @@ StorageManager::StorageManager()
 // IService::initialize
 // ============================================================
 Result StorageManager::initialize() {
-    if (m_state != ServiceState::UNINITIALIZED) {
+    if (m_state != Interfaces::ServiceState::UNINITIALIZED) {
         return Result::ERR_ALREADY_INITIALIZED;
     }
 
-    m_state = ServiceState::INITIALIZING;
+    m_state = Interfaces::ServiceState::INITIALIZING;
 
     // Initialize NVS backends
     Result r = m_nvsConfig.initialize();
     if (GW_ERR(r)) {
         GW_LOG_E(TAG, "NVS config init failed: %s",
                  ResultHelper::toString(r));
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return r;
     }
 
@@ -56,7 +56,7 @@ Result StorageManager::initialize() {
     if (GW_ERR(r)) {
         GW_LOG_E(TAG, "NVS auth init failed: %s",
                  ResultHelper::toString(r));
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return r;
     }
 
@@ -64,7 +64,7 @@ Result StorageManager::initialize() {
     if (GW_ERR(r)) {
         GW_LOG_E(TAG, "NVS system init failed: %s",
                  ResultHelper::toString(r));
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return r;
     }
 
@@ -73,11 +73,11 @@ Result StorageManager::initialize() {
     if (GW_ERR(r)) {
         GW_LOG_E(TAG, "LittleFS init failed: %s",
                  ResultHelper::toString(r));
-        m_state = ServiceState::FAULTED;
+        m_state = Interfaces::ServiceState::FAULTED;
         return r;
     }
 
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
     GW_LOG_I(TAG, "All storage backends initialized.");
     return Result::OK;
 }
@@ -86,11 +86,11 @@ Result StorageManager::initialize() {
 // IService::start
 // ============================================================
 Result StorageManager::start() {
-    if (m_state != ServiceState::STOPPED) {
+    if (m_state != Interfaces::ServiceState::STOPPED) {
         return Result::ERR_INVALID_STATE;
     }
 
-    m_state = ServiceState::RUNNING;
+    m_state = Interfaces::ServiceState::RUNNING;
     GW_LOG_I(TAG, "Started.");
     return Result::OK;
 }
@@ -99,14 +99,14 @@ Result StorageManager::start() {
 // IService::stop
 // ============================================================
 Result StorageManager::stop() {
-    m_state = ServiceState::STOPPED;
+    m_state = Interfaces::ServiceState::STOPPED;
     return Result::OK;
 }
 
 // ============================================================
 // IService::getState
 // ============================================================
-ServiceState StorageManager::getState() const {
+Interfaces::ServiceState StorageManager::getState() const {
     return m_state;
 }
 
@@ -114,7 +114,7 @@ ServiceState StorageManager::getState() const {
 // IService::isHealthy
 // ============================================================
 bool StorageManager::isHealthy() const {
-    if (m_state != ServiceState::RUNNING) return false;
+    if (m_state != Interfaces::ServiceState::RUNNING) return false;
     if (!m_nvsConfig.isReady())           return false;
     if (!m_littleFS.isReady())            return false;
     if (isStorageLow())                   return false;
@@ -221,9 +221,10 @@ Result StorageManager::deleteFile(const char* path) {
 // ============================================================
 bool StorageManager::isStorageLow() const {
     size_t total = 0, used = 0, free = 0;
-    const_cast<LittleFSStorage&>(m_littleFS).getFSStats(
+    Result r = const_cast<LittleFSStorage&>(m_littleFS).getFSStats(
         total, used, free
     );
+    if (GW_ERR(r)) return true; // Consider low if we can't get stats
     // Warn if less than 10% free
     return (total > 0) && (free < total / 10);
 }
@@ -233,10 +234,10 @@ bool StorageManager::isStorageLow() const {
 // ============================================================
 size_t StorageManager::getFreeSpaceBytes() const {
     size_t total = 0, used = 0, free = 0;
-    const_cast<LittleFSStorage&>(m_littleFS).getFSStats(
+    Result r = const_cast<LittleFSStorage&>(m_littleFS).getFSStats(
         total, used, free
     );
-    return free;
+    return GW_OK(r) ? free : 0;
 }
 
 } // namespace Storage

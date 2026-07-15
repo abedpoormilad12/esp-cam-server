@@ -39,7 +39,7 @@ Logger::Logger()
 }
 
 Logger::~Logger() {
-    stop();
+    (void)stop();
 }
 
 // ============================================================
@@ -99,7 +99,7 @@ Result Logger::start() {
         "Logger",
         TASK_STACK_WORDS,
         this,
-        Config::Tasks::LOGGER_PRIORITY,
+        tskIDLE_PRIORITY + 1,
         m_taskStack,
         &m_taskTCB,
         Config::Tasks::CORE_APPLICATION

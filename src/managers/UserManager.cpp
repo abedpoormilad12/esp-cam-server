@@ -637,8 +637,9 @@ Result UserManager::verifyCredentials(
             "0$00000000000000000000000000000000"
             "0000000000000000000000000000000000";
         bool match = false;
-        Security::PBKDF2::getInstance()
-            .verifyPassword(password, dummy, match);
+        Result dummyRes = Security::PBKDF2::getInstance()
+                               .verifyPassword(password, dummy, match);
+        (void)dummyRes;
         return Result::ERR_AUTH_INVALID_CREDENTIALS;
     }
 
@@ -670,7 +671,7 @@ Result UserManager::verifyCredentials(
     if (GW_ERR(r)) return r;
 
     if (!match) {
-        recordFailedLogin(username);
+        r = recordFailedLogin(username);
         return Result::ERR_AUTH_INVALID_CREDENTIALS;
     }
 
@@ -863,10 +864,11 @@ Result UserManager::save() const {
 // ============================================================
 Result UserManager::load() {
     bool exists = false;
-    Storage::StorageManager::getInstance().fileExists(
+    Result r = Storage::StorageManager::getInstance().fileExists(
         Config::Storage::FS_USERS_FILE, exists
     );
 
+    if (GW_ERR(r)) return r;
     if (!exists) {
         GW_LOG_I(TAG, "Users file not found.");
         return Result::ERR_FILE_NOT_FOUND;
@@ -976,8 +978,8 @@ Result UserManager::serializeUser(JsonObject&         obj,
 // ============================================================
 // deserializeUser
 // ============================================================
-Result UserManager::deserializeUser(const JsonObject& obj,
-                                     Models::User&     user) {
+Result UserManager::deserializeUser(const JsonObjectConst& obj,
+                                     Models::User&       user) const {
     if (!obj["id"].is<const char*>()) return Result::ERR_INVALID_ARGUMENT;
 
     strncpy(user.userId,

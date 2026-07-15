@@ -183,7 +183,7 @@ Result StateMachine::start() {
         Config::Tasks::STACK_STATE_MACHINE,
         this,
         Config::Tasks::PRIORITY_STATE_MACHINE,
-        // m_taskStack,
+        m_taskStack,
         &m_taskTCB,
         Config::Tasks::CORE_APPLICATION
     );
