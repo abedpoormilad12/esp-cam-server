@@ -139,11 +139,9 @@ private:
     // --------------------------------------------------------
     // Constants from config
     // --------------------------------------------------------
-    static constexpr uint8_t  QUEUE_LENGTH    = Config::EventBus::QUEUE_SIZE;
     static constexpr uint8_t  MAX_SUBSCRIBERS = Config::EventBus::MAX_LISTENERS_PER_EVENT
                                                 * Config::EventBus::MAX_EVENT_TYPES / 4;
-    static constexpr uint32_t TASK_STACK_WORDS =
-        Config::Tasks::EVENT_BUS_STACK_WORDS;
+    static constexpr uint32_t TASK_STACK_WORDS = Config::Tasks::STACK_EVENT_BUS;
 
     // --------------------------------------------------------
     // Member data
@@ -158,7 +156,7 @@ private:
     // FreeRTOS queue — statically allocated
     QueueHandle_t           m_queue;
     StaticQueue_t           m_queueBuffer;
-    uint8_t                 m_queueStorage[QUEUE_LENGTH * sizeof(Event)];
+    uint8_t                 m_queueStorage[Config::EventBus::QUEUE_SIZE * sizeof(Event)];
 
     // FreeRTOS task — statically allocated
     TaskHandle_t            m_taskHandle;

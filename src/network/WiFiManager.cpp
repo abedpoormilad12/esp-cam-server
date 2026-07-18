@@ -392,7 +392,7 @@ void WiFiManager::tick() {
 // attemptReconnect
 // ============================================================
 void WiFiManager::attemptReconnect() {
-    reconnect();
+(void)reconnect();
 }
 
 // ============================================================

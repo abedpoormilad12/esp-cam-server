@@ -58,7 +58,7 @@ public:
     [[nodiscard]] Result       initialize()       override;
     [[nodiscard]] Result       start()            override;
     [[nodiscard]] Result       stop()             override;
-    [[nodiscard]] ServiceState getState()  const  override;
+    [[nodiscard]] Interfaces::ServiceState getState()  const  override;
     [[nodiscard]] const char*  getName()   const  override { return "WebServer"; }
     [[nodiscard]] bool         isHealthy() const  override;
 
@@ -110,7 +110,7 @@ private:
     // --------------------------------------------------------
     // Member data
     // --------------------------------------------------------
-    ServiceState         m_state;
+    Interfaces::ServiceState         m_state;
     AsyncWebServer       m_server;
     AsyncWebSocket       m_wsSocket;
 

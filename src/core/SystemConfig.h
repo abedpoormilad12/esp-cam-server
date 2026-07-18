@@ -7,6 +7,8 @@
 #pragma once
 
 #include <arduino.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #include <cstddef>
 
@@ -14,6 +16,64 @@
 #define SYSTEM_CONFIG_H
 
 #include <cstdint>
+
+#ifndef FIRMWARE_PROJECT
+#define FIRMWARE_PROJECT "ESP-CAM-Server"
+#endif
+#ifndef FIRMWARE_VENDOR
+#define FIRMWARE_VENDOR "Unknown Vendor"
+#endif
+#ifndef FIRMWARE_BUILD_TYPE
+#define FIRMWARE_BUILD_TYPE "Release"
+#endif
+
+#ifndef BOOT_MANAGER_STACK_WORDS
+#define BOOT_MANAGER_STACK_WORDS 4096U
+#endif
+#ifndef HEALTH_MONITOR_STACK_WORDS
+#define HEALTH_MONITOR_STACK_WORDS 2048U
+#endif
+#ifndef EVENT_BUS_STACK_WORDS
+#define EVENT_BUS_STACK_WORDS 2048U
+#endif
+#ifndef LOGGER_STACK_WORDS
+#define LOGGER_STACK_WORDS 2048U
+#endif
+#ifndef STATE_MACHINE_STACK_WORDS
+#define STATE_MACHINE_STACK_WORDS 4096U
+#endif
+#ifndef NETWORK_MANAGER_STACK_WORDS
+#define NETWORK_MANAGER_STACK_WORDS 4096U
+#endif
+
+#ifndef PRIORITY_VALUE_BOOT_MANAGER
+#define PRIORITY_VALUE_BOOT_MANAGER 3
+#endif
+#ifndef PRIORITY_VALUE_HEALTH_MONITOR
+#define PRIORITY_VALUE_HEALTH_MONITOR 2
+#endif
+#ifndef PRIORITY_VALUE_EVENT_BUS
+#define PRIORITY_VALUE_EVENT_BUS 2
+#endif
+#ifndef PRIORITY_VALUE_LOGGER
+#define PRIORITY_VALUE_LOGGER 1
+#endif
+#ifndef PRIORITY_VALUE_STATE_MACHINE
+#define PRIORITY_VALUE_STATE_MACHINE 2
+#endif
+#ifndef PRIORITY_VALUE_NETWORK_MANAGER
+#define PRIORITY_VALUE_NETWORK_MANAGER 3
+#endif
+
+#ifndef ENABLE_SERIAL_LOGGING
+#define ENABLE_SERIAL_LOGGING true
+#endif
+#ifndef SERIAL_BAUD_RATE
+#define SERIAL_BAUD_RATE 115200
+#endif
+#ifndef LOG_LEVEL_DEFAULT
+#define LOG_LEVEL_DEFAULT 2
+#endif
 
 namespace Gateway {
 namespace Config {
@@ -52,23 +112,23 @@ struct Hardware {
 // ============================================================
 struct Tasks {
     // Stack sizes (bytes from build flags; convert to words for FreeRTOS)
-    static constexpr uint32_t BOOT_MANAGER_STACK_WORDS =
-        STACK_SIZE_BOOT_MANAGER / sizeof(StackType_t);
+    static constexpr uint32_t BOOT_MANAGER_STACK =
+        BOOT_MANAGER_STACK_WORDS / sizeof(StackType_t);
 
-    static constexpr uint32_t HEALTH_MONITOR_STACK_WORDS =
-        STACK_SIZE_HEALTH_MONITOR / sizeof(StackType_t);
+    static constexpr uint32_t HEALTH_MONITOR_STACK =
+        HEALTH_MONITOR_STACK_WORDS / sizeof(StackType_t);
 
-    static constexpr uint32_t EVENT_BUS_STACK_WORDS =
-        STACK_SIZE_EVENT_BUS / sizeof(StackType_t);
+    static constexpr uint32_t EVENT_BUS_STACK =
+        EVENT_BUS_STACK_WORDS / sizeof(StackType_t);
 
-    static constexpr uint32_t LOGGER_STACK_WORDS =
-        STACK_SIZE_LOGGER / sizeof(StackType_t);
+    static constexpr uint32_t LOGGER_STACK =
+        LOGGER_STACK_WORDS / sizeof(StackType_t);
 
-    static constexpr uint32_t STATE_MACHINE_STACK_WORDS =
-        STACK_SIZE_STATE_MACHINE / sizeof(StackType_t);
+    static constexpr uint32_t STATE_MACHINE_STACK =
+        STATE_MACHINE_STACK_WORDS / sizeof(StackType_t);
 
-    static constexpr uint32_t NETWORK_MANAGER_STACK_WORDS =
-        STACK_SIZE_NETWORK_MANAGER / sizeof(StackType_t);
+    static constexpr uint32_t NETWORK_MANAGER_STACK =
+        NETWORK_MANAGER_STACK_WORDS / sizeof(StackType_t);
 
     // Exposed task stack sizes used by components.
     static constexpr uint32_t STACK_BOOT_MANAGER = BOOT_MANAGER_STACK_WORDS;

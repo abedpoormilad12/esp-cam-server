@@ -179,7 +179,7 @@ private:
 
     // Task stack — statically allocated
     static constexpr uint32_t TASK_STACK_WORDS =
-        Config::Tasks::LOGGER_STACK_WORDS;
+        Config::Tasks::STACK_LOGGER;
     StaticTask_t             m_taskTCB;
     StackType_t              m_taskStack[TASK_STACK_WORDS];
 

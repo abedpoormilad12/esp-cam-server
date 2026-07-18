@@ -110,7 +110,7 @@ Result mDNSManager::stop() {
 // restart
 // ============================================================
 Result mDNSManager::restart() {
-    stop();
+    (void)stop();
     vTaskDelay(pdMS_TO_TICKS(100));
     return start();
 }

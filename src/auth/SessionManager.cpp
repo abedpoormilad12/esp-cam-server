@@ -85,7 +85,10 @@ Result SessionManager::start() {
 
 Result SessionManager::stop() {
     if (m_state == Interfaces::ServiceState::RUNNING) {
-        destroyAllSessions();
+        Result r = destroyAllSessions();
+        if (GW_ERR(r)) {
+            return r;
+        }
         m_state = Interfaces::ServiceState::STOPPED;
     }
     return Result::OK;

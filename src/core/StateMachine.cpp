@@ -83,6 +83,10 @@ const StateTransition StateMachine::s_transitionTable[] = {
 const size_t StateMachine::s_transitionCount =
     sizeof(s_transitionTable) / sizeof(s_transitionTable[0]);
 
+static StackType_t s_stateMachineTaskStack[
+    Config::Tasks::STACK_STATE_MACHINE
+];
+
 // ============================================================
 // Singleton
 // ============================================================

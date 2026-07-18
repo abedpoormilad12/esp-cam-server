@@ -306,8 +306,13 @@ Result AuthManager::login(
     }
 
     // Record successful login
-    Managers::UserManager::getInstance()
-        .recordSuccessfulLogin(user.userId);
+    Result r2 = Managers::UserManager::getInstance()
+                    .recordSuccessfulLogin(user.userId);
+    if (GW_ERR(r2)) {
+        GW_LOG_W(TAG, "Failed to record successful login for '%s': %s",
+                 user.username,
+                 ResultHelper::toString(r2));
+    }
 
     // Create session
     r = SessionManager::getInstance().createSession(

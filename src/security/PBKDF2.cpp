@@ -312,13 +312,13 @@ void PBKDF2::bytesToHex(
     char*          output,
     size_t         outputSize)
 {
-    static constexpr char HEX[] = "0123456789abcdef";
+    static constexpr char HEX_TABLE[] = "0123456789abcdef";
     size_t maxBytes = (outputSize - 1) / 2;
     size_t count    = (len < maxBytes) ? len : maxBytes;
 
     for (size_t i = 0; i < count; ++i) {
-        output[i * 2]     = HEX[(input[i] >> 4) & 0x0F];
-        output[i * 2 + 1] = HEX[input[i] & 0x0F];
+        output[i * 2]     = HEX_TABLE[(input[i] >> 4) & 0x0F];
+        output[i * 2 + 1] = HEX_TABLE[input[i] & 0x0F];
     }
     output[count * 2] = '\0';
 }

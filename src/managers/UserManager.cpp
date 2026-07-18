@@ -877,7 +877,7 @@ Result UserManager::load() {
     char   jsonBuffer[JSON_DOC_SIZE];
     size_t jsonSize = 0;
 
-    Result r = Storage::StorageManager::getInstance().readJsonFile(
+    r = Storage::StorageManager::getInstance().readJsonFile(
         Config::Storage::FS_USERS_FILE,
         jsonBuffer,
         sizeof(jsonBuffer),

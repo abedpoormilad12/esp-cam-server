@@ -176,8 +176,10 @@ private:
     Result deserializeFromJson(const JsonDocument& doc);
     Result serializeUser(JsonObject& obj,
                           const Models::User& user) const;
-    Result deserializeUser(const JsonObject& obj,
-                            Models::User& user);
+    Result deserializeUser(
+        const JsonObjectConst& obj,
+        Models::User& user
+    ) const;
 
     static uint32_t nowSeconds() noexcept;
 

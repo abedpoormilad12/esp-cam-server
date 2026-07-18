@@ -38,7 +38,7 @@ EventBus::EventBus()
 }
 
 EventBus::~EventBus() {
-    stop();
+    (void)stop();
 }
 
 // ============================================================
@@ -53,11 +53,11 @@ Result EventBus::initialize() {
 
     // Create queue with static storage
     m_queue = xQueueCreateStatic(
-        QUEUE_LENGTH,
-        sizeof(Event),
-        m_queueStorage,
-        &m_queueBuffer
-    );
+    Config::EventBus::QUEUE_SIZE,
+    sizeof(Event),
+    m_queueStorage,
+    &m_queueBuffer
+);
 
     if (m_queue == nullptr) {
         m_state = ServiceState::FAULTED;
@@ -81,7 +81,7 @@ Result EventBus::initialize() {
     m_state = ServiceState::STOPPED;
 
     GW_LOG_I(TAG, "Initialized. Queue depth: %d, Max subscribers: %d",
-             QUEUE_LENGTH, static_cast<int>(sizeof(m_subscribers) /
+             Config::EventBus::QUEUE_SIZE, static_cast<int>(sizeof(m_subscribers) /
              sizeof(m_subscribers[0])));
 
     return Result::OK;

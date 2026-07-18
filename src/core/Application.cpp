@@ -84,7 +84,12 @@ void Application::begin() {
     }
 
     // ---- Step 5: Subscribe to EventBus ----
-    Services::EventBus::getInstance().subscribe(this);
+    r = Services::EventBus::getInstance().subscribe(this);
+    if (GW_ERR(r)) {
+        GW_LOG_C(TAG, "EventBus subscribe failed: %s",
+                 ResultHelper::toString(r));
+        esp_restart();
+    }
 
     // ---- Step 6: Initialize + start StateMachine ----
     r = Core::StateMachine::getInstance().initialize();
@@ -181,12 +186,22 @@ void Application::createServiceInstances() {
     using namespace Services;
 
     // Register Logger (already initialized)
-    SL().registerService(ServiceId::LOGGER,
+    Result r = SL().registerService(ServiceId::LOGGER,
                           &Logger::getInstance());
+    if (GW_ERR(r)) {
+        GW_LOG_E(TAG, "Logger service registration failed: %s",
+                 ResultHelper::toString(r));
+        return;
+    }
 
     // Register EventBus (already initialized)
-    SL().registerService(ServiceId::EVENT_BUS,
+    r = SL().registerService(ServiceId::EVENT_BUS,
                           &EventBus::getInstance());
+    if (GW_ERR(r)) {
+        GW_LOG_E(TAG, "EventBus service registration failed: %s",
+                 ResultHelper::toString(r));
+        return;
+    }
 
     // Future services will be instantiated and registered here
     // as their modules are implemented in subsequent phases:
@@ -266,7 +281,11 @@ Application::getSubscribedEvents(size_t& outCount) const {
 void Application::shutdown() {
     GW_LOG_I(TAG, "Initiating graceful shutdown...");
 
-    Services::SL().stopAllServices();
+    Result r = Services::SL().stopAllServices();
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "stopAllServices() failed during shutdown: %s",
+                 ResultHelper::toString(r));
+    }
 
     GW_LOG_I(TAG, "All services stopped. Halting.");
     Services::Logger::getInstance().flush(3000);
@@ -281,7 +300,11 @@ void Application::shutdown() {
 void Application::restart() {
     GW_LOG_I(TAG, "Initiating restart...");
 
-    Services::SL().stopAllServices();
+    Result r = Services::SL().stopAllServices();
+    if (GW_ERR(r)) {
+        GW_LOG_W(TAG, "stopAllServices() failed during restart: %s",
+                 ResultHelper::toString(r));
+    }
     Services::Logger::getInstance().flush(2000);
 
     esp_restart();

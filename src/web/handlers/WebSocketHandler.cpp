@@ -371,9 +371,8 @@ void WebSocketHandler::handlePong(AsyncWebSocketClient* client) {
 void WebSocketHandler::onEvent(const Interfaces::Event& event) {
     if (!m_ws) return;
 
-    const char* eventName = Interfaces::systemEventToString(
-        static_cast<Core::SystemEvent>(0xFF)
-    );
+    const char* eventName =
+    (event.message[0] != '\0') ? event.message : "EVENT";
 
     // Map EventType to string
     char eventType[32] = "system.event";

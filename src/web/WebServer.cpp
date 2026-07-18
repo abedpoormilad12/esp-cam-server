@@ -15,6 +15,8 @@
 namespace Gateway {
 namespace Web {
 
+using Interfaces::ServiceState;
+
 static constexpr const char* TAG = "WebServer";
 
 // ============================================================
@@ -122,7 +124,7 @@ bool WebServer::isHealthy() const {
 // ============================================================
 // IService::getState
 // ============================================================
-ServiceState WebServer::getState() const {
+Interfaces::ServiceState WebServer::getState() const {
     return m_state;
 }
 

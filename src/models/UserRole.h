@@ -151,7 +151,7 @@ inline constexpr const char* roleToString(UserRole role) noexcept {
         case UserRole::SUPERADMIN: return "superadmin";
         default:                   return "unknown";
     }
-};
+}
 
 inline constexpr UserRole roleFromString(const char* str) noexcept {
     if (!str) return UserRole::NONE;
